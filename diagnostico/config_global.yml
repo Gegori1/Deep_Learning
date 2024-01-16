@@ -1,0 +1,9 @@
+mnist:
+  data:
+    data_path: data
+    data_train: mnist_train.csv
+    data_test: mnist_test.csv
+  models:
+    model_path: models
+    scaler_filename: scaler.pkl
+    model_filename: mnist_model.pkl
