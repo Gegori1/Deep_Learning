@@ -5,5 +5,5 @@ mnist:
     data_test: mnist_test.csv
   models:
     model_path: models
-    scaler_filename: scaler.pkl
+    scaler: 255 
     model_filename: mnist_model.pkl
