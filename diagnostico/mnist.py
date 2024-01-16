@@ -9,17 +9,21 @@ from diagnostic_package.Utils import find_root_dir, read_config
 
 # %% config global
 
-rd = find_root_dir()
+rd = find_root_dir() # finds root dir
+cf = read_config() # read configuration
 
-cf = read_config()
+# data and models dictionary
+ddict, mdict = cf['mnist']['data'], cf['mnist']['models']
 
-data_path = rd / cf['mnist']['data']['data_path']
+# data path
+data_path = rd / ddict['data_path']
+train_path = data_path / ddict['data_train']
+test_path = data_path / ddict['data_test']
 
-train_path = data_path / cf['mnist']['data']['train_path_mnist']
-test_path = data_path / cf['mnist']['data']['test_path_mnist']
-
-scaler_filename = cf['mnist']['data']['scaler_filename']
-model_filename = cf['mnist']['data']['model_filename']
+# model path
+model_path = rd / mdict['model_path']
+scaler_filename = model_path / mdict['scaler_filename']
+model_filename = model_path / mdict['model_filename']
 
 # %% load data
 data_train = pd.read_csv(train_path) 
