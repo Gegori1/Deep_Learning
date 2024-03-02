@@ -2,12 +2,7 @@
 import os
 import sys
 import shutil
-
 import numpy as np
-import matplotlib.pyplot as plt
-
-import torch
-from torchvision import datasets, transforms
 
 from google.colab import drive
 drive.mount('/content/drive')
@@ -42,7 +37,7 @@ for folder in folders:
     # check if the test folder is less than 30
     folder_dst = os.path.join(test_folder, folder)
     len_files_dst = len(os.listdir(folder_dst))
-    if len_files_dst < 30:
+    if len_files_dst < img_to_test:
         folder_src = os.path.join(path_src, folder)
         files_src = os.listdir(folder_src)
         files_src = np.random.choice(files_src, img_to_test - len_files_dst, replace=False)
