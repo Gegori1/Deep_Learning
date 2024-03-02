@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from typing import Type
 
-class BlockModel18(nn.Module):
+class BlockModel18_34(nn.Module):
     def __init__(
         self, 
         in_channels: int,
@@ -42,14 +42,14 @@ class BlockModel18(nn.Module):
         out = self.relu(out)
         return out
 
-class ResNet34(nn.Module):
+class ResNet(nn.Module):
     def __init__(
         self,
         img_channels: int,
         num_classes:int,
         layers: int,
         # block: Type[BlockModel18, BlockModel50]
-        block: Type[BlockModel18],
+        block: Type[BlockModel18_34],
     ) -> None:
         super().__init__()
         if layers == 18:

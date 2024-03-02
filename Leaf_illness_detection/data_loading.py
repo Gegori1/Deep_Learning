@@ -8,17 +8,13 @@ from collections import Counter
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, WeightedRandomSampler, random_split
 from torchvision.datasets import ImageFolder
-from torchvision.transforms import v2 as transforms
+# from torchvision.transforms import v2 as transforms
+from torchvision.transforms import transforms
 from torch.utils.data import Subset
-from custom_load import LeafDataset
 
 
 from google.colab import drive
 drive.mount('/content/drive')
-
-# %% parameters
-
-path_to_data: str = '/content/drive/My Drive/Deep_Learning_class/plant_illness/color_2/'
 
 # %% train and eval data loader
 
@@ -54,7 +50,14 @@ def load_train_eval_data(path_to_data: str, batch_size: int = 32, eval_size: flo
     targets = data.targets
 
     # Perform a stratified split
-    train_data, eval_data = train_test_split(data, test_size=eval_size, stratify=targets, random_state=random_state)
+    train_data, eval_data, _, _ = train_test_split(
+        range(len(targets)), 
+        targets, 
+        test_size=eval_size, 
+        stratify=targets, 
+        random_state=random_state
+    )
+
     stratified_train_data = Subset(data, train_data)
     stratified_eval_data = Subset(data, eval_data)
     
