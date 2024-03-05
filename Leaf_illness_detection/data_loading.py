@@ -13,12 +13,9 @@ from torchvision.transforms import transforms
 from torch.utils.data import Subset
 
 
-from google.colab import drive
-drive.mount('/content/drive')
-
 # %% train and eval data loader
 
-def load_train_eval_data(path_to_data: str, batch_size: int = 32, eval_size: float = 0.2, resize: int = 225, random_state: int = 42):
+def load_train_eval_data(path_to_data: str, batch_size: int = 32, eval_size: float = 0.2, resize: int = 225, random_state: int = 42, workers: int = 4):
     """
     Load train and evaluation data from a directory containing subdirectories with images.
 
@@ -50,32 +47,36 @@ def load_train_eval_data(path_to_data: str, batch_size: int = 32, eval_size: flo
     targets = data.targets
 
     # Perform a stratified split
-    train_data, eval_data, _, _ = train_test_split(
+    train_index, eval_index, targets_train, targets_eval = train_test_split(
         range(len(targets)), 
         targets, 
         test_size=eval_size, 
         stratify=targets, 
         random_state=random_state
     )
-
-    stratified_train_data = Subset(data, train_data)
-    stratified_eval_data = Subset(data, eval_data)
+  	
+    subset_train, subset_eval = Subset(data, train_index), Subset(data, eval_index)
     
     # set a weighted sampler for the DataLoader
-    count_class = dict(Counter(data.targets))
-    weights = [1.0 / v for v in count_class.values()]
-    sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
+    count_class_train, count_class_eval = dict(Counter(targets_eval)), dict(Counter(targets_eval))
     
-    train_data = DataLoader(dataset=stratified_train_data, batch_size=batch_size, sampler=sampler, num_workers=1)
-    eval_data = DataLoader(dataset=stratified_eval_data, batch_size=batch_size, sampler=sampler, num_workers=1)
+    weights_train = [1 / count_class_train[i] for i in targets_train]
+    weights_eval = [1 / count_class_eval[i] for i in targets_eval]
+
+    sampler_train = WeightedRandomSampler(weights_train, num_samples=len(weights_train), replacement=True)
+    sampler_eval = WeightedRandomSampler(weights_eval, num_samples=len(weights_eval), replacement=True)
+
+    
+    train_data = DataLoader(dataset=subset_train, batch_size=batch_size, sampler=sampler_train, num_workers=workers, pin_memory=True, pin_memory_device="cuda")
+    eval_data = DataLoader(dataset=subset_eval, batch_size=batch_size, sampler=sampler_eval, num_workers=workers, pin_memory=True, pin_memory_device="cuda")
     
     return train_data, eval_data
 
 
 # %% test data loader
 
-def load_test_data(path_to_data: str, batch_size: int = 32, resize: int = 225):
-    """
+def load_test_data(path_to_data: str, batch_size: int = 32, resize: int = 225, workers: int = 4):
+  """
     Load test data from a directory containing subdirectories with images.
 
     Args:
@@ -83,12 +84,25 @@ def load_test_data(path_to_data: str, batch_size: int = 32, resize: int = 225):
     
     Returns:
     test_data: DataLoader: Test data.
-    """
+  """
+
+  trnsf = transforms.Compose([
+          transforms.Resize([resize, resize]),
+          transforms.ToTensor(),
+          transforms.Normalize(mean=0.5, std=0.5)
+    ])
 
     # Create a dataset
-    data = ImageFolder(root=path_to_data)
+  data = ImageFolder(root=path_to_data, transform=trnsf)
+
+  targets = data.targets
+
+  # set a weighted sampler for the DataLoader
+  count_class = dict(Counter(targets))
+  weights = [1 / count_class[i] for i in targets]
+  sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
     
     # Create a DataLoader
-    test_data = DataLoader(dataset=data, batch_size=batch_size, shuffle=True, num_workers=1)
+  test_data = DataLoader(dataset=data, batch_size=batch_size, sampler=sampler, num_workers=workers, pin_memory=True, pin_memory_device="cuda")
     
-    return test_data
+  return test_data
