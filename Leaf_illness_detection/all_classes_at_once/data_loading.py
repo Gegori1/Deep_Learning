@@ -1,21 +1,15 @@
 # %% libraries
-import os
-import sys
-import shutil
-import numpy as np
-
 from collections import Counter
 from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader, WeightedRandomSampler, random_split
+from torch.utils.data import DataLoader, WeightedRandomSampler
 from torchvision.datasets import ImageFolder
-# from torchvision.transforms import v2 as transforms
 from torchvision.transforms import transforms
 from torch.utils.data import Subset
 
 
 # %% train and eval data loader
 
-def load_train_eval_data(path_to_data: str, batch_size: int = 32, eval_size: float = 0.2, resize: int = 225, random_state: int = 42, workers: int = 4):
+def load_train_eval_data(path_to_data: str, batch_size: int = 32, eval_size: float = 0.2, resize: int = 224, random_state: int = 42, workers: int = 4, pin_memory_device: None|str = None):
     """
     Load train and evaluation data from a directory containing subdirectories with images.
 
@@ -66,16 +60,55 @@ def load_train_eval_data(path_to_data: str, batch_size: int = 32, eval_size: flo
     sampler_train = WeightedRandomSampler(weights_train, num_samples=len(weights_train), replacement=True)
     sampler_eval = WeightedRandomSampler(weights_eval, num_samples=len(weights_eval), replacement=True)
 
-    
-    train_data = DataLoader(dataset=subset_train, batch_size=batch_size, sampler=sampler_train, num_workers=workers, pin_memory=True, pin_memory_device="cuda")
-    eval_data = DataLoader(dataset=subset_eval, batch_size=batch_size, sampler=sampler_eval, num_workers=workers, pin_memory=True, pin_memory_device="cuda")
+    if pin_memory_device is None:
+        train_data = DataLoader(dataset=subset_train, batch_size=batch_size, sampler=sampler_train, num_workers=workers)
+        eval_data = DataLoader(dataset=subset_eval, batch_size=batch_size, sampler=sampler_eval, num_workers=workers)
+    else:
+      train_data = DataLoader(dataset=subset_train, batch_size=batch_size, sampler=sampler_train, num_workers=workers, pin_memory=True, pin_memory_device=pin_memory_device)
+      eval_data = DataLoader(dataset=subset_eval, batch_size=batch_size, sampler=sampler_eval, num_workers=workers, pin_memory=True, pin_memory_device=pin_memory_device)
     
     return train_data, eval_data
 
 
 # %% test data loader
 
-def load_test_data(path_to_data: str, batch_size: int = 32, resize: int = 225, workers: int = 4):
+def load_train_data(path_to_data: str, batch_size: int = 32, resize: int = 224, workers: int = 4, pin_memory_device: None|str = None):
+  """
+    Load train data from a directory containing subdirectories with images.
+
+    Args:
+    path_to_data: str: Path to the directory containing subdirectories with images.
+    
+    Returns:
+    train_data: DataLoader: train data.
+  """
+
+  trnsf = transforms.Compose([
+          transforms.Resize([resize, resize]),
+          transforms.ToTensor(),
+          transforms.Normalize(mean=0, std=1)
+    ])
+
+    # Create a dataset
+  data = ImageFolder(root=path_to_data, transform=trnsf)
+
+  targets = data.targets
+
+  # set a weighted sampler for the DataLoader
+  count_class = dict(Counter(targets))
+  weights = [1 / count_class[i] for i in targets]
+  sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
+    
+    # Create a DataLoader
+  if pin_memory_device is None:
+    train_data = DataLoader(dataset=data, batch_size=batch_size, sampler=sampler, num_workers=workers)
+  else:
+    train_data = DataLoader(dataset=data, batch_size=batch_size, sampler=sampler, num_workers=workers, pin_memory=True, pin_memory_device=pin_memory_device)
+    
+  return train_data
+
+
+def load_test_data(path_to_data: str, batch_size: int = 32, resize: int = 224, workers: int = 4, pin_memory_device: None|str = None):
   """
     Load test data from a directory containing subdirectories with images.
 
@@ -94,15 +127,11 @@ def load_test_data(path_to_data: str, batch_size: int = 32, resize: int = 225, w
 
     # Create a dataset
   data = ImageFolder(root=path_to_data, transform=trnsf)
-
-  targets = data.targets
-
-  # set a weighted sampler for the DataLoader
-  count_class = dict(Counter(targets))
-  weights = [1 / count_class[i] for i in targets]
-  sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
     
     # Create a DataLoader
-  test_data = DataLoader(dataset=data, batch_size=batch_size, sampler=sampler, num_workers=workers, pin_memory=True, pin_memory_device="cuda")
+  if pin_memory_device is None:
+    test_data = DataLoader(dataset=data, batch_size=batch_size, num_workers=workers)
+  else:
+    test_data = DataLoader(dataset=data, batch_size=batch_size, num_workers=workers, pin_memory=True, pin_memory_device=pin_memory_device)
     
   return test_data

@@ -67,7 +67,7 @@ class ResNet(nn.Module):
         else:
             raise ValueError("Layers must be 18 or 34")
             
-        self.in_channels = 64          
+        self.in_channels = 64
         
         # First layer
         self.PrincipalBlock = nn.Sequential(
