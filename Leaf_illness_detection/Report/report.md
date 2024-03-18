@@ -137,7 +137,7 @@ PyTorch. (n.d.). AlexNet model architecture. Retrieved from https://pytorch.org/
 
 Ramzan, M. (2019). Original ResNet-18 Architecture. ResearchGate. Retrieved from https://www.researchgate.net/figure/Original-ResNet-18-Architecture_fig1_336642248
 
-colab
+Colab: https://drive.google.com/drive/folders/10PNoF4lGEA8aHDnfCU1Q70lUjlcFidH5?usp=sharing
 
-github
+github: https://github.com/Gegori1/Deep_Learning/tree/main/Leaf_illness_detection
 
