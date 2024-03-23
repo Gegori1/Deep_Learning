@@ -45,28 +45,35 @@ class LungDatasetClassif(Dataset):
 
   def __getitem__(self, idx):
     img_path, class_id = self.samples[idx]
-    # msk_path = img_path.replace("images", "lung masks")
-    
+    msk_path = img_path.replace("images", "lung masks")
+  
     # load image and mask
     img = imread(img_path, flags=IMREAD_GRAYSCALE)
-    img = np.expand_dims(img, axis=-1)
-    # msk = imread(msk_path, flags=IMREAD_GRAYSCALE)
+    msk = imread(msk_path, flags=IMREAD_GRAYSCALE)
+
     
     if self.resize:
       img = resize(img, self.resize)
       msk = resize(msk, self.resize)
       
+    msk = np.expand_dims(msk, axis=0)
+    img = np.expand_dims(img, axis=0)
+      
     img_tensor = torch.from_numpy(img).float()
-    img_tensor = img_tensor.permute(2, 0, 1)
+    # img_tensor = img_tensor.permute(2, 0, 1)
     img_tensor = img_tensor / 255
     
-    # msk_tensor = torch.from_numpy(msk).float()
-    # msk_tensor = msk_tensor / 255
+    msk_tensor = torch.from_numpy(msk).float()
+    # img_tensor = img_tensor.permute(2, 0, 1)
+    msk_tensor = msk_tensor / 255
     
-    if self.transform:
+    if self.transform and (not isinstance(self.transform, transforms.Compose)):
+      img_tensor, msk_tensor = self.transform(img_tensor, msk_tensor)
+    elif self.transform:
       img_tensor = self.transform(img_tensor)
+      
+    samples = {'image': img_tensor, 'mask': msk_tensor, 'class': class_id}
     
-    
-    return img_tensor, class_id
+    return samples
 
 # %%

@@ -8,11 +8,13 @@ from torch.utils.data import DataLoader, WeightedRandomSampler
 from custom_load_resnet import LungDatasetClassif
 from torchvision.transforms import transforms
 from torch.utils.data import Subset
+import random
+import torchvision.transforms.functional as TF
 
 
 # %% train and eval data loader
 
-def load_train_eval_data(path_to_data: str, batch_size: int = 32, eval_size: float = 0.2, resize: int = 225, random_state: int = 42, workers: int = 4, pin_memory_device: None|object = None):
+def load_train_eval_data(path_to_data: str, batch_size: int = 32, eval_size: float = 0.2, resize: int = 224, random_state: int = 42, workers: int = 4, pin_memory_device: None|object = None):
     """
     Load train and evaluation data from a directory containing subdirectories with images.
 
@@ -25,21 +27,58 @@ def load_train_eval_data(path_to_data: str, batch_size: int = 32, eval_size: flo
     train_data: DataLoader: Train data.
     eval_data: DataLoader: eval data.
     """
-    # Create a transformation
-    trnsf = transforms.Compose([
-        transforms.RandomCrop(size=resize),
-        transforms.Resize([resize, resize]),
-        transforms.RandomAdjustSharpness(2),
-        transforms.RandomAutocontrast(),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomVerticalFlip(),
-        transforms.RandomRotation(10),
-        # transforms.ToTensor(),
-        transforms.Normalize(mean=0.5, std=0.5)
-    ])
+    # # Create a transformation
+    # trnsf = transforms.Compose([
+    #     transforms.RandomCrop(size=resize),
+    #     transforms.Resize([resize, resize]),
+    #     transforms.RandomAdjustSharpness(2),
+    #     transforms.RandomAutocontrast(),
+    #     # transforms.RandomHorizontalFlip(),
+    #     # transforms.RandomVerticalFlip(),
+    #     transforms.RandomRotation(10),
+    #     # transforms.ToTensor(),
+    #     transforms.Normalize(mean=0.5, std=0.5)
+    # ])
+    
+    def transform(image, mask):
+        # Random crop
+        # print(image.shape, mask.shape)
+        i, j, h, w = transforms.RandomCrop.get_params(
+            image, output_size=(resize, resize))
+        image = TF.crop(image, i, j, h, w)
+        mask = TF.crop(mask, i, j, h, w)
+
+        # Random horizontal flipping
+        if random.random() > 0.5:
+            image = TF.hflip(image)
+            mask = TF.hflip(mask)
+
+        # Random vertical flipping
+        if random.random() > 0.5:
+            image = TF.vflip(image)
+            mask = TF.vflip(mask)
+
+        # Random adjustment of sharpness
+        if random.random() > 0.5:
+            sharpness_factor = random.uniform(0, 2)
+            image = TF.adjust_sharpness(image, sharpness_factor)
+
+        # Random autocontrast
+        if random.random() > 0.5:
+            image = TF.autocontrast(image)
+
+        # Random rotation
+        angle = random.uniform(-10, 10)
+        image = TF.rotate(image, angle)
+        mask = TF.rotate(mask, angle)
+
+        # Normalize
+        normalize = transforms.Normalize(mean=0.5, std=0.5)
+        image = normalize(image)
+        return image, mask
 
     # Create a dataset
-    data = LungDatasetClassif(root=path_to_data, transform=trnsf)
+    data = LungDatasetClassif(root=path_to_data, transform=transform)
     
     targets = data.targets
 
@@ -75,7 +114,7 @@ def load_train_eval_data(path_to_data: str, batch_size: int = 32, eval_size: flo
 
 # %% test data loader
 
-def load_train_data(path_to_data: str, batch_size: int = 32, resize: int = 225, workers: int = 4, pin_memory_device: None|object = None):
+def load_train_data(path_to_data: str, batch_size: int = 32, resize: int = 224, workers: int = 4, pin_memory_device: None|object = None):
   """
     Load train data from a directory containing subdirectories with images.
 
@@ -87,20 +126,59 @@ def load_train_data(path_to_data: str, batch_size: int = 32, resize: int = 225, 
   """
 
   # Create a transformation
-  trnsf = transforms.Compose([
-      transforms.RandomCrop(size=resize),
-      transforms.Resize([resize, resize]),
-      transforms.RandomAdjustSharpness(2),
-      transforms.RandomAutocontrast(),
-      transforms.RandomHorizontalFlip(),
-      transforms.RandomVerticalFlip(),
-      transforms.RandomRotation(10),
-      # transforms.ToTensor(),
-      transforms.Normalize(mean=0.5, std=0.5)
-  ])
+  # trnsf = transforms.Compose([
+  #     transforms.RandomCrop(size=resize),
+  #     transforms.Resize([resize, resize]),
+  #     transforms.RandomAdjustSharpness(2),
+  #     transforms.RandomAutocontrast(),
+  #     # transforms.RandomHorizontalFlip(),
+  #     # transforms.RandomVerticalFlip(),
+  #     transforms.RandomRotation(10),
+  #     # transforms.ToTensor(),
+  #     transforms.Normalize(mean=0.5, std=0.5)
+  # ])
+  
+  
+
+  def transform(image, mask):
+      # Random crop
+      i, j, h, w = transforms.RandomCrop.get_params(
+          image, output_size=(resize, resize))
+      image = TF.crop(image, i, j, h, w)
+      mask = TF.crop(mask, i, j, h, w)
+
+      # Random horizontal flipping
+      if random.random() > 0.5:
+          image = TF.hflip(image)
+          mask = TF.hflip(mask)
+
+      # Random vertical flipping
+      if random.random() > 0.5:
+          image = TF.vflip(image)
+          mask = TF.vflip(mask)
+
+      # Random adjustment of sharpness
+      if random.random() > 0.5:
+          sharpness_factor = random.uniform(0, 2)
+          image = TF.adjust_sharpness(image, sharpness_factor)
+
+      # Random autocontrast
+      if random.random() > 0.5:
+          image = TF.autocontrast(image)
+
+      # Random rotation
+      angle = random.uniform(-10, 10)
+      image = TF.rotate(image, angle)
+      mask = TF.rotate(mask, angle)
+
+      # Normalize
+      normalize = transforms.Normalize(mean=0.5, std=0.5)
+      image = normalize(image)
+      return image, mask
+
 
     # Create a dataset
-  data = LungDatasetClassif(root=path_to_data, transform=trnsf)
+  data = LungDatasetClassif(root=path_to_data, transform=transform)
 
   targets = data.targets
 
@@ -118,7 +196,7 @@ def load_train_data(path_to_data: str, batch_size: int = 32, resize: int = 225, 
   return train_data
 
 
-def load_test_data(path_to_data: str, batch_size: int = 32, resize: int = 225, workers: int = 4, pin_memory_device: None|object = None):
+def load_test_data(path_to_data: str, batch_size: int = 32, resize: int = 224, workers: int = 4, pin_memory_device: None|object = None):
   """
     Load test data from a directory containing subdirectories with images.
 
@@ -130,13 +208,11 @@ def load_test_data(path_to_data: str, batch_size: int = 32, resize: int = 225, w
   """
 
   trnsf = transforms.Compose([
-          transforms.Resize([resize, resize]),
-          transforms.ToTensor(),
-          transforms.Normalize(mean=0, std=1)
+          transforms.Normalize(mean=0.5, std=0.5)
     ])
 
     # Create a dataset
-  data = LungDatasetClassif(root=path_to_data, transform=trnsf)
+  data = LungDatasetClassif(root=path_to_data, transform=trnsf, resize_size=resize)
     
     # Create a DataLoader
   if "cuda" in pin_memory_device.type:

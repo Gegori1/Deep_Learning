@@ -68,14 +68,14 @@ class FitTrainEval:
         start = time()
         self.clear_metric_loss()
         print(f"Epoch {epoch+1}/{epochs}")
-        print("Training")
-        for i, (batch_x, batch_y) in tqdm(enumerate(data_train), total=tot_train):
-          batch_x = batch_x.to(self.device)
-          batch_y = batch_y.to(self.device)
+        for i, batch in tqdm(enumerate(data_train), total=tot_train):
+          batch_x = batch["image"].to(self.device)
+          batch_mask = batch["mask"].to(self.device)
+          batch_y = batch["class"].to(self.device)
 
           self.model.train()
 
-          y_pred = self.model(batch_x)
+          y_pred = self.model(batch_x, batch_mask)
           loss = self.loss(y_pred, batch_y)
 
           self.optimizer.zero_grad()
@@ -91,11 +91,12 @@ class FitTrainEval:
         self.model.eval() # <- different behaviour for some training layers
         with torch.no_grad(): # <- do not compute the comp. graph
           print("Evaluating")
-          for i, (batch_x, batch_y) in tqdm(enumerate(data_eval), total=tot_eval):
-            batch_x = batch_x.to(self.device)
-            batch_y = batch_y.to(self.device)
+          for i, batch in tqdm(enumerate(data_eval), total=tot_eval):
+            batch_x = batch["image"].to(self.device)
+            batch_mask = batch["mask"].to(self.device)
+            batch_y = batch["class"].to(self.device)
 
-            y_pred = self.model(batch_x)
+            y_pred = self.model(batch_x, batch_mask)
             loss = self.loss(y_pred, batch_y)
 
             self.val_losses.append(loss.item())
