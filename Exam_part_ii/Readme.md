@@ -12,10 +12,9 @@ For the first approximation the usage of a graph was used to find a solution to 
 - `Second approximation`
 For ther second approximation two joined ResNet neural networks were trained and a U-Net was later trained in a different stage. The two trained graphs were joined togheter to solve both problems simultaneously.
 
-The code on this repository can be found on the following [google drive folder](https://drive.google.com/drive/folders/1QL9J2Mm0WOoghS9Gy42QUsd3s-A84F_d?usp=sharing) were the code was hosted to get advantage of the GPU virtual machines.
+The code on this repository can be found on the following [google drive folder](https://drive.google.com/drive/folders/1QL9J2Mm0WOoghS9Gy42QUsd3s-A84F_d?usp=sharing), were the code was hosted to get advantage of the GPU virtual machines.
 
-
-Even though some of the files and folders on the google drive folder have different names than the ones hosted righ here, the file structure remains the same. In the following section the names of the google drive folders will be specificed inside paranthesis: 
+The files and folders structure has the following configuration:
 
 
 ```
@@ -47,7 +46,7 @@ Even though some of the files and folders on the google drive folder have differ
 ```
 
 The first approximation code is located in the `classification_segmentation` folder, including the training and testing notebooks and the related scripts.
-For the second approximation, the training and testing process of the classification is positioned in `classification_problem`, while the related files for the segmentation are placed in `segmentation_problem`.
+For the second approximation, the training and testing processes of the classification are positioned in `classification_problem`, while the related files for the segmentation are placed in `segmentation_problem`.
 Finally, the testing files for the joint pretrained models are located in `join_problem_pretrained`.
 
 Results:
