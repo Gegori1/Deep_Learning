@@ -1,4 +1,6 @@
-The following sub-repository contains the information for the second part of the Deep Learning course.
+## Covid Lung classification and Segmentation
+
+The following sub-repository contains the information for the second part of the Deep Learning course examination.
 The problem to be solved is the classification of X-ray images of healthy patients, patients with covid and patiens with a differnt pulmonary disease, expressed as non-covid on this problem.
 The second task is semantic segmentation of the same group of images to classify the regions where the lungs are located.
 
@@ -8,7 +10,7 @@ For this problem, two approximations were tested.
 For the first approximation the usage of a graph was used to find a solution to the two problems at the same time. To create this graph, two pretrained MobileNet V3 neural networks and a pretrained U-Net were used.
 
 - `Second approximation`
-For ther second approximation two joint ResNet neural networks were trained and a U-Net was later trained in a different stage. The two trained graphs were joined to solve both problems
+For ther second approximation two joined ResNet neural networks were trained and a U-Net was later trained in a different stage. The two trained graphs were joined togheter to solve both problems simultaneously.
 
 The code on this repository can be found on the following [google drive folder](https://drive.google.com/drive/folders/1QL9J2Mm0WOoghS9Gy42QUsd3s-A84F_d?usp=sharing) were the code was hosted to get advantage of the GPU virtual machines.
 
@@ -48,4 +50,5 @@ For the segmentation problem, the Jaccard Index or Intersecction Over Union metr
 | Approximation        | IOU    | Accuracy | PR-AUC  |
 |----------------------|--------|----------|---------|
 | Joint graph          | 0.9009 | 0.3685   | 0.3333  |
+| Joint graph          | 0.8564 | 0.4942   | 0.3364  |
 | Pretrained models    | 0.9443 | 0.5074   | 0.3352  |
