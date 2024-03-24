@@ -20,19 +20,26 @@ Even though some of the files and folders on the google drive folder have differ
 
 ```
 - classification_segmentation/
+    ├── TrainCovidNNGraph.ipynb
+    ├── TestCovidNNGraph.ipynb
     ├── custom_load.py
     ├── fit_func.py
     └── unet_mobilenet.py
 - classification_problem/
+    ├── CovidClassificationTrain.ipynb
+    |── CovidClassificationTest.ipynb
     ├── custom_load_resnet.py
     |── data_loading_resnet.py
     ├── fit_func_resnet_dual.py
     └── resnet18_dual_model.py
 - segmentation_problem/
+    ├── TestCovidSegmentation.ipynb
+    ├── TrainCovidSegmentation.ipynb
     ├── custom_load.py
     ├── fit_func_segmentation.py
     └── unet_model.py
 - joint_problem_pretrained/
+    ├── TestCovidSegmentationClassification.ipynb
     ├── custom_load.py
     ├── resnet18_dual_model.py
     ├── unet_model.py
