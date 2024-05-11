@@ -12,8 +12,9 @@ class YoloLoss(Module):
         lambda_noobj: int=0.5,
         lambda_wh: int=5,
         lambda_class: int=1,
-        B: int=2, 
-        S: int=7, 
+        B: int=2,
+        S: int=7,
+        C: int=2,
         format="cxcywh"
     ):
         super().__init__()
@@ -24,12 +25,13 @@ class YoloLoss(Module):
         self.lambda_class = lambda_class
         self.B = B
         self.S = S
+        self.C = C
         self.format = format
         self.reduction = "sum"
 
     def forward(self, y_pred, y_true):
         # reshape y_pred (N, S*S*5*B) (N, S, S, 5*B)
-        y_pred = y_pred.view(-1, self.S, self.S, (self.B*5 + self.B*2))
+        y_pred = y_pred.view(-1, self.S, self.S, (self.B*5 + self.C))
         # print(f"y_pred: {y_pred.shape}")
         # index for places where object exists
         obj_mask = y_true[..., 4] == 1
@@ -37,7 +39,7 @@ class YoloLoss(Module):
         
         box_1, box_2 = y_pred[..., :5], y_pred[..., 5:10]
         
-        class_1, class_2 = y_pred[..., 10:12], y_pred[..., 12:]
+        class_box = y_pred[..., 10:12]
         # print(f"class_1: {class_1.shape}, class_2: {class_2.shape}")
         
         # print(box_1[..., :4].shape, y_true[..., :4].shape)
@@ -104,7 +106,7 @@ class YoloLoss(Module):
             reduction=self.reduction
         )
         
-        class_box = best * class_1 + (1 - best) * class_2
+        # class_box = best * class_1 + (1 - best) * class_2
         # print(f"class_box: {class_box.shape}")
         
         # print(cls_obj_loss)
@@ -134,7 +136,7 @@ class YoloLoss(Module):
             reduction=self.reduction
         )
         
-        # print(f"class_box {class_box.shape}, {y_true[..., 5:].shape}")
+        # print(f"class_box {class_box[obj_mask].shape}, {y_true[..., 5:][obj_mask].shape}")
         
         # print(cls_noobj_loss)
         
@@ -153,7 +155,7 @@ class YoloLoss(Module):
 if __name__ == '__main__':
     
     torch.manual_seed(32)
-    y_pred = torch.rand((3, 7 * 7 * 14))
+    y_pred = torch.rand((3, 7 * 7 * 12))
     y_true = torch.rand((3, 7, 7, 7))
     y_true[..., 4] = torch.randint(0, 2, (3, 7, 7))
     

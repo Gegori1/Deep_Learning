@@ -4,14 +4,14 @@ import torch
 from time import time
 
 class FitTrainEval:
-  def __init__(self, model, S:int, B:int, weights:list, loss, optimizer, metrics, path_save=None, device='cuda'):
+  def __init__(self, model, S:int, B:int, loss, optimizer, metrics, path_save=None, save_best=True, device='cuda'):
     self.model = model.to(device)
     self.S = S
     self.B = B
     self.criterion = loss
-    self.weights = weights
     self.optimizer = optimizer
     self.path_save = path_save
+    self.save_best = save_best
     self.device = device
     self.names = [metric.__name__ for metric in metrics]
     self.metrics = {name: metric for name, metric in zip(self.names, metrics)}
@@ -85,7 +85,6 @@ class FitTrainEval:
 
           self.train_losses.append(loss.item())
           for name in self.names:
-            y_pred = y_pred.view(-1, self.S, self.S, 5*self.B)
             metric = self.metrics[name](y_pred, batch_y).item()
             self.train_metrics[name].append(metric)
 
@@ -102,7 +101,6 @@ class FitTrainEval:
 
             self.val_losses.append(loss.item())
             for name in self.names:
-              y_pred = y_pred.view(-1, self.S, self.S, 5*self.B)
               metric = self.metrics[name](y_pred, batch_y).item()
               self.val_metrics[name].append(metric)
 
@@ -128,8 +126,10 @@ class FitTrainEval:
         finish = time()
         print(f"Epoch time: {finish - start} s")
 
-        print(f"Checker: {current_metric} < {best_metric}")
-        if (current_metric > best_metric) and (self.path_save is not None):
+        print(f"Checker: {current_metric} > {best_metric}")
+        if (current_metric > best_metric) and (self.path_save is not None) and self.save_best:
+          self.save_model()
+        elif (self.path_save is not None) and not self.save_best:
           self.save_model()
 
       self.define_history()

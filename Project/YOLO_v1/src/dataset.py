@@ -51,10 +51,6 @@ class YoloDataset(Dataset):
     a_h, a_w = img.shape[:2] # height, width
     # resize height and width
     r_w, r_h = self.resize_size
-    # x_min = (x_min/a_w)
-    # y_min = (y_min/a_h)
-    # x_max = (x_max/a_w)
-    # y_max = (y_max/a_h)
     
     img = resize(img, self.resize_size)
     
@@ -73,8 +69,12 @@ class YoloDataset(Dataset):
     if self.transform and isinstance(self.transform, A.core.composition.Compose):
       tranformed = self.transform(image=img, bboxes=[[x_c, y_c, w, h, class_]])
       
+      # try:
       img = tranformed["image"]
       w, h, x, y, *_ = tranformed["bboxes"][0]
+      # except IndexError:
+      #   print(f"Image: {img_path} | Bounding box: {x_c, y_c, w, h}")
+      #   raise IndexError("No bounding box found in the transformed image")
     
     elif self.transform:
       raise ValueError("transform must be an instance of albumentations.Compose")
@@ -83,12 +83,18 @@ class YoloDataset(Dataset):
     i = int(x_c*self.S)
     j = int(y_c*self.S)
     
+    # resize to cell size
+    x_cell = x_c * self.S - i
+    y_cell = y_c * self.S - j
+    w_cell = w * self.S
+    h_cell = h * self.S
+    
     # create target tensor
-    target = torch.zeros((self.S, self.S, 6))
-    target[j, i, 0] = x_c
-    target[j, i, 1] = y_c
-    target[j, i, 2] = w
-    target[j, i, 3] = h
+    target = torch.zeros((self.S, self.S, 7))
+    target[j, i, 0] = x_cell
+    target[j, i, 1] = y_cell
+    target[j, i, 2] = w_cell
+    target[j, i, 3] = h_cell
     target[j, i, 4] = 1
     target[j, i, 5] = 1 - class_
     target[j, i, 6] = class_

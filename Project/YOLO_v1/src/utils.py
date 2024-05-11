@@ -21,6 +21,16 @@ def indicator_to_df(current_folder_path, female_file_name, male_file_name)->pd.D
 
     train_eval_df = pd.concat([female_df, male_df])
     
+    not_files = [
+        "f2_00001929.jpg", "f1_tr_75.jpg", "f1_tr_32.jpg", 
+        "f1_tr_21.jpg", "f2_00001337.jpeg", "f2_00001831.jpg",
+        "f2_missclassed (59).jpg", "f2_00001845.jpg", "f2_00000076.jpg",
+        "f2_00000677.jpg", "f2_00001862.jpg", "f3_1 (770).jpg", "f2_00002183.jpg",
+        "f2_00002200.jpg"
+    ]
+    
+    train_eval_df = train_eval_df.query("file_name not in @not_files")
+    
     return train_eval_df
 
 # %%

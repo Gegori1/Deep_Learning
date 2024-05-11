@@ -36,8 +36,10 @@ def YoloLoaderTrainEval(
   """
   
   tnsfm = A.Compose([
-    A.RandomCrop(width=200, height=200),
-    A.PadIfNeeded(min_height=224, min_width=224, always_apply=True, border_mode=BORDER_CONSTANT, value=0),
+    A.PadIfNeeded(min_height=resize, min_width=resize, always_apply=True, border_mode=BORDER_CONSTANT, value=0),
+    A.Rotate(limit=90, p=0.3),
+    A.RandomSizedBBoxSafeCrop(width=int(0.8*resize), height=int(0.8*resize)),
+    A.PadIfNeeded(min_height=resize, min_width=resize, always_apply=True, border_mode=BORDER_CONSTANT, value=0),
     A.HorizontalFlip(p=0.5),
     A.VerticalFlip(p=0.5),
     A.RandomBrightnessContrast(p=0.2),
@@ -72,6 +74,7 @@ def YoloLoaderTrainEval(
 
 def YoloLoaderTest(
     path_to_data: str, 
+    subdir: str,
     batch_size: int, 
     resize: None|int|tuple|list = None, 
     grid: int = 7, 
@@ -92,9 +95,14 @@ def YoloLoaderTest(
     Returns:
     test_data: DataLoader: Test data.
   """
-
-    # Create a dataset
-  data = YoloDataset(path_to_data, resize_size=resize, S=grid)
+  
+  # Create a dataset
+  data = YoloDataset(
+    path_to_data,
+    subdir=subdir,
+    resize_size=resize,
+    S=grid
+  )
     
     # Create a DataLoader
   if "cuda" in pin_memory_device.type:

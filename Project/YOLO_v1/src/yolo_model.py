@@ -101,7 +101,7 @@ class Yolov1(nn.Module):
         return nn.Sequential(
             nn.Flatten(),
             nn.Linear(1024 * S * S, 4096),
-            nn.Dropout(0.5),
+            nn.Dropout(0.2),
             nn.LeakyReLU(0.1),
             nn.Linear(4096, S * S * (C + B * 5)),
         )
@@ -109,10 +109,11 @@ class Yolov1(nn.Module):
 # %%
 if __name__ == '__main__':
     from torchsummary import summary
-    model = Yolov1(split_size=4, num_boxes=2, num_classes=1)
+    model = Yolov1(split_size=4, num_boxes=2, num_classes=2)
+    
+    x = torch.randn((2, 3, 224, 224))
+    print(model(x).shape)
     summary(model, (3, 224, 224))
-    # x = torch.randn((2, 3, 448, 448))
-    # print(model(x).shape)
 # %%
 
 # %%
