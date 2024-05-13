@@ -5,10 +5,9 @@ from torchvision.utils import draw_bounding_boxes
 import matplotlib.pyplot as plt
 
 class Pipeline:
-    def __init__(self, model_fasterrcnn, model_facenet, image_path, device):
+    def __init__(self, model_fasterrcnn, model_facenet, device):
         self.model_fasterrcnn = model_fasterrcnn
         self.model_facenet = model_facenet
-        self.image_path = image_path
         self.device = device
         
     def test_transform_fasterrcnn(self):
@@ -37,8 +36,8 @@ class Pipeline:
         
         
         
-    def run(self):
-        image = read_image(self.image_path)
+    def run_pipe(self, image_path):
+        image = read_image(image_path)
         # FasterRCNN
         transform_rcnn = self.test_transform_fasterrcnn()
         self.model_fasterrcnn.eval()
