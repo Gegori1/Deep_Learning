@@ -19,22 +19,20 @@ The following repository has the following directory structure:
 ## Object detection
 
 - YOLO v1
-For the object detection, the aim is to use a YOLO v1 model to identify the location of faces and determine the gender of the person shown in the image.
 
-For this task a YOLO v1 was implemented. Another three models using ResNet18-34-50 as a backbone were used to accomplish the task
-
-Due to poor quality inference results, other models were explored.
+The initial intent was to use YOLO v1 for the face detection algorithm, but due to poor quality inference, the descicion to switch to a pretrained model was made.
 
 - Faster R-CNN
 
-A pretrained faster R-CNN model was fine tuned with the Female and Male images obtaining an Average Precision (AP) of `0.3434`
+A pretrained faster R-CNN model was fine tuned with the Female and Male dataset during two epochs obtaining an Average Precision (AP) of `0.5385` and Average Recall (AR) of `0.5805` on the validation set.
 
+A first visual check indicates that the model worked well on the test set. An AP of `0.7245` and a AR of `0.5855` was obtained for this dataset.
 
 ## Object recognition
 
 - FaceNet (ResnetInception v1)
-A pretrained resnetInception model was used to get a 512 dimensional embedding.
-The distance between the resulting vectors was measured to 
+
+A pretrained ResnetInception model was used to get a 512 dimensional embedding of each image. The distance between the resulting vectors was measured using the cosine distance.
 
 
 ## References
